@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Cancer Detection using 3D TDP Imaging</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- <i class="fas fa-stethoscope icon"></i> -->
+        <img src="../static/images/ribbon.png" height="100px">
+        <h1>Skin Lesion Detection</h1>
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <div class="image-upload-area" onclick="document.getElementById('fileInput').click()">
+                <input id="fileInput" type="file" name="file" accept="image/*" required hidden onchange="previewImage(event)">
+                <img id="imagePreview" src="#" alt="Click to select an image" style="display: none; max-width: 100%; height: auto;"/>
+                <p id="placeholderText">Click here to upload an image</p>
+            </div>
+
+            <!-- Suggested images section -->
+            <div class="example-images">
+                <p>Or select an example image:</p>
+                <div class="examples">
+                    <img src="../static/images/example1.jpg" alt="Example 1" onclick="selectExample(this)">
+                    <img src="../static/images/example2.jpg" alt="Example 2" onclick="selectExample(this)">
+                    <img src="../static/images/example3.jpg" alt="Example 3" onclick="selectExample(this)">
+                    <img src="../static/images/example4.jpg" alt="Example 4" onclick="selectExample(this)">
+                    <img src="../static/images/example5.jpg" alt="Example 5" onclick="selectExample(this)">
+                    <img src="../static/images/example6.jpg" alt="Example 6" onclick="selectExample(this)">
+                    <img src="../static/images/example7.jpg" alt="Example 7" onclick="selectExample(this)">
+                    <img src="../static/images/example8.jpg" alt="Example 8" onclick="selectExample(this)">
+                    <img src="../static/images/example9.jpg" alt="Example 9" onclick="selectExample(this)">
+                    <img src="../static/images/example10.jpg" alt="Example 10" onclick="selectExample(this)">
+                </div>
+            </div>
+
+            <button type="submit">Upload & Predict</button>
+        </form>
+        {% if prediction  == "Non-Melanoma" %}
+        <div class="result_N" id="res">
+            <h2>Prediction: {{ prediction }}</h2>
+        </div>
+        {% elif prediction == "Melanoma" %}
+        <div class="result_M" id="res">
+            <h2>Prediction: {{ prediction }}</h2>
+        </div>
+        {% endif %}
+        
+    </div>
+    <script>
+        function previewImage(event) {
+
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('placeholderText');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            document.getElementById('res').remove();
+        }
+
+        async function selectExample(e)
+        {
+            const imgElement = e;
+            const fileInput = document.getElementById("fileInput");
+
+            try
+            {
+                // Fetch the image data
+                const response = await fetch(imgElement.src);
+                const blob = await response.blob();
+
+                // Create a File object
+                const file = new File([blob], "image.jpg", { type: blob.type });
+
+                // Create a DataTransfer object to populate the input file
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                const preview = document.getElementById('imagePreview');
+                const placeholder = document.getElementById('placeholderText');
+
+                preview.src = e.src;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+
+                document.getElementById('res').remove();
+            }
+            catch (error) 
+            {
+                console.error("Error fetching or processing the image:", error);
+            }
+        }
+
+    </script>
+</body>
+</html>
